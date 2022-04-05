@@ -52,6 +52,43 @@ let renderMoveHistory = function (moves) {
   historyElement.scrollTop(historyElement[0].scrollHeight);
 };
 
+let onDragStart = function (source, piece, position, orientation) {
+  if (
+    game.in_checkmate() === true ||
+    game.in_draw() === true ||
+    piece.search(/^b/) !== -1
+  ) {
+    return false;
+  }
+};
+
+let onDrop = function (source, target) {
+  let move = game.move({
+    from: source,
+    to: target,
+    promotion: "q",
+  });
+
+  removeGreySquares();
+  if (move === null) {
+    return "snapback";
+  }
+
+  renderMoveHistory(game.history());
+  setTimeout(makeBestMove, 250);
+};
+
+let config = {
+  pieceTheme: "https://chessboardjs.com/img/chesspieces/alpha/{piece}.png",
+  draggable: true,
+  dropOffBoard: "snapback", // this is the default
+  position: "start",
+  onDragStart: onDragStart,
+  onDrop: onDrop,
+  onMouseoutSquare: onMouseoutSquare,
+  onMouseoverSquare: onMouseoverSquare,
+  onSnapEnd: onSnapEnd,
+};
 const pieceValue = {
   p: 10,
   n: 30,
@@ -104,26 +141,12 @@ let calculateBestMove = function (game) {
 
   positionCount = 0;
   let now = new Date();
-  let bestMove = minimaxRoot(game, 3, true);
+  let bestMove = minimaxRoot(game, 4, true);
   let then = new Date();
   const moveTime = then - now;
   const positionperS = (positionCount * 1000) / moveTime;
   console.log(positionCount, moveTime, positionperS);
   return bestMove;
-};
-
-let calculateRandomMove = function (game) {
-  const moves = game.moves();
-  return moves[Math.floor(Math.random() * moves.length)];
-};
-
-const makeRandomMove = function () {
-  const move = calculateRandomMove(game);
-  game.move(move);
-  board.position(game.fen());
-  if (game.game_over()) {
-    alert("Game over!");
-  }
 };
 
 const makeBestMove = function () {
@@ -133,44 +156,6 @@ const makeBestMove = function () {
   if (game.game_over()) {
     alert("Game over!");
   }
-};
-
-let onDragStart = function (source, piece, position, orientation) {
-  if (
-    game.in_checkmate() === true ||
-    game.in_draw() === true ||
-    piece.search(/^b/) !== -1
-  ) {
-    return false;
-  }
-};
-
-let onDrop = function (source, target) {
-  let move = game.move({
-    from: source,
-    to: target,
-    promotion: "q",
-  });
-
-  removeGreySquares();
-  if (move === null) {
-    return "snapback";
-  }
-
-  renderMoveHistory(game.history());
-  setTimeout(makeBestMove, 250);
-};
-
-let config = {
-  pieceTheme: "https://chessboardjs.com/img/chesspieces/alpha/{piece}.png",
-  draggable: true,
-  dropOffBoard: "snapback", // this is the default
-  position: "start",
-  onDragStart: onDragStart,
-  onDrop: onDrop,
-  onMouseoutSquare: onMouseoutSquare,
-  onMouseoverSquare: onMouseoverSquare,
-  onSnapEnd: onSnapEnd,
 };
 
 const minimaxRoot = function (game, depth, movingPlayer) {
