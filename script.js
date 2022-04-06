@@ -145,7 +145,7 @@ let calculateBestMove = function (game) {
   let then = new Date();
   const moveTime = then - now;
   const positionperS = (positionCount * 1000) / moveTime;
-  console.log(positionCount, moveTime, positionperS);
+  console.log(positionCount, moveTime / 1000, positionperS);
   return bestMove;
 };
 
